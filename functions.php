@@ -7,15 +7,16 @@
   function feed_socialstream($comment) {	
 	  $feed = new Feed;	
     
-	  $feed->twitter = "hrblock";
-	  $feed->facebook = "hrblock";
-	  $feed->youtube = "hrblock";
+	  $feed->twitter = "rm";
+	  //$feed->facebook = "hrblock";
+	  //$feed->youtube = "hrblock";
+	  $feed->posts = "numberposts=10&post_type=any";
 	  $feed->blog = true;
 	  $feed->count = 15;
 	
 	  $items = $feed->json();
 	  foreach ( $items as $item ) {
-	  	echo $item['type'] . " - " . $item['ago'] . " - " . $item['short_formatted'] . "<br />";
+  		echo $item['type'] . " - " . $item['ago'] . " - " . $item['short_formatted'] . "<br />";
 	  }
 	
 	  //header('Content-type: application/json');	

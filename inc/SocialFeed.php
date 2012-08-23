@@ -1,5 +1,25 @@
 <?php
+	
+	class PostFeed {
+		var $query = "";
 
+		function get() {
+			$posts = array();
+			$postdata = get_posts($this->query);
+	        foreach($postdata as $post) {
+	    		array_push($posts, array(
+					'type' => $post->post_type,
+					'time' => strtotime($post->post_date),
+					'text' => $post->post_title ,
+					'text_formatted' => $post->post_title ,
+					'excerpt' => $post->post_excerpt,
+					'link' => get_permalink($post->ID),
+				));
+	        }
+			return $posts;
+		}
+
+	}
 	class FacebookFeed extends SocialFeed {
 		
 		var $url = 'https://graph.facebook.com/%s/posts?access_token=178783688861822|59Vu39OlE75gR8xjF9XbROZ636s&limit=%s';
@@ -165,29 +185,47 @@
 		var $twitter = "";
 		var $facebook = "";
 		var $youtube = "";
+		var $posts = "";
 		var $count = 10;
 		
 		function json() {
 			return $this->_mashFeeds();
 		}
 		
-		protected function _mashFeeds() {
-			$twitter = new TwitterFeed;
-			$twitter->user = $this->twitter;
-			$twitter->count = $this->count;			
-			$tw = $twitter->get();
-		
-			$facebook = new FacebookFeed;
-			$facebook->user = $this->facebook;
-			$facebook->count = $this->count;			
-			$fb = $facebook->get();
-				
-			$youtube = new YouTubeFeed;
-			$youtube->user = $this->youtube;
-			$youtube->count = $this->count;			
-			$yt = $youtube->get();
+		protected function _mashFeeds() {		
+			$tw = array();
+			$fb = array();
+			$yt = array();
+			$pt = array();
 
-			$all = $this->_sort(array_merge($fb, $tw, $yt));			
+			if ( $this->twitter ) {
+				$twitter = new TwitterFeed;
+				$twitter->user = $this->twitter;
+				$twitter->count = $this->count;			
+				$tw = $twitter->get();
+			}
+
+			if ( $this->facebook ) {
+				$facebook = new FacebookFeed;
+				$facebook->user = $this->facebook;
+				$facebook->count = $this->count;			
+				$fb = $facebook->get();
+			}
+
+			if ( $this->youtube ) {
+				$youtube = new YouTubeFeed;
+				$youtube->user = $this->youtube;
+				$youtube->count = $this->count;
+				$yt = $youtube->get();
+			}
+
+			if ( $this->posts ) {
+				$posts = new PostFeed;
+				$posts->query = $this->posts;
+				$pt = $posts->get();
+			}
+
+			$all = $this->_sort(array_merge($fb, $tw, $yt, $pt));
 			$all = $this->_format_posts($all);
 			
 			return $all;
@@ -203,8 +241,8 @@
 			
 			foreach ( $arry as $item ) {
 				$item['ago'] = $this->_ago($item['time']);
-        $item['short_link'] = $this->_truncate($item['link'], '40');
-        $item['short_text'] = $this->_truncate($item['text'], '140');
+        		$item['short_link'] = $this->_truncate($item['link'], '40');
+        		$item['short_text'] = $this->_truncate($item['text'], '140');
 				$item['short_formatted'] = $this->_truncate($item['text_formatted'], '140');
 				$item['date'] = date("Y.j.n H:m", $item['time']);
 				array_push($newarry, $item);
