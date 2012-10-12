@@ -55,7 +55,7 @@
 	
 	class TwitterFeed extends SocialFeed {
 		
-		var $url = 'http://twitter.com/statuses/user_timeline.json?screen_name=%s&count=%s';
+		var $url = 'http://api.twitter.com/1/statuses/user_timeline.json?screen_name=%s&count=%s';
 		var $user = "";
 		var $type = "twitter";
 		
